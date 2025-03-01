@@ -18,9 +18,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
-#include <string.h>
-
 #include "fatfs.h"
 #include "i2c.h"
 #include "usart.h"
@@ -30,7 +27,11 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "vl53l0x.h"
+#include <string.h>
+#include <stdio.h>
+#include "my_print.h"
+#include "st7920.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -105,15 +106,38 @@ int main(void)
   MX_SDMMC1_SD_Init();
   MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
-  char msg[20] = "hello world\r\n";
+  HAL_Delay(2000);
+
+  char msg[30] = "hello world\r\n";
+  HAL_UART_Transmit(&hlpuart1, msg, strlen(msg), 100);
+
+  if (vl53l0x_init()) {
+    sprintf(msg, "init success");
+    HAL_UART_Transmit(&hlpuart1, msg, strlen(msg), 100);
+  } else {
+    sprintf(msg, "init failed");
+    HAL_UART_Transmit(&hlpuart1, msg, strlen(msg), 100);
+
+  }
+
+  uint16_t range = 0;
+  //my_printf("hello");
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    HAL_UART_Transmit(&hlpuart1, msg, strlen(msg), 100);
+    for (vl53l0x_idx_t idx = VL53L0X_IDX_FIRST; idx <= VL53L0X_IDX_THIRD; idx++) {
+      if (!vl53l0x_read_range_single(idx, &range)) {
+        my_printf("read failed device: %d", idx);
+      }
+      sprintf(msg, "dev: %d, range: %d\r\n", idx, range);
+      HAL_UART_Transmit(&hlpuart1, msg, strlen(msg), 100);
+    }
+
     HAL_Delay(1000);
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

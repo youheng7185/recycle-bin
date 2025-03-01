@@ -57,6 +57,14 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define xshut4_Pin GPIO_PIN_2
+#define xshut4_GPIO_Port GPIOG
+#define xshut3_Pin GPIO_PIN_3
+#define xshut3_GPIO_Port GPIOG
+#define xshut2_Pin GPIO_PIN_4
+#define xshut2_GPIO_Port GPIOG
+#define xshut1_Pin GPIO_PIN_5
+#define xshut1_GPIO_Port GPIOG
 #define led_Pin GPIO_PIN_7
 #define led_GPIO_Port GPIOG
 
