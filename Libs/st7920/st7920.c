@@ -8,40 +8,51 @@
 #include "st7920.h"
 #include "stm32h7xx.h"
 #include "font.h"
+#include "spi.h"
 
-extern SPI_HandleTypeDef hspi1;
+extern SPI_HandleTypeDef hspi4;
 
 void st7920_writeCmd(uint8_t cmd)
 {
-	HAL_GPIO_WritePin(GPIOA, lcd_cs_Pin, SET);
+	HAL_GPIO_WritePin(GPIOE, lcd_cs_Pin, SET);
 	uint8_t txBuffer[3];
 	txBuffer[0] = 0xF8;
 	txBuffer[1] = (cmd & 0xF0);
 	txBuffer[2] = ((cmd << 4) & 0xF0);
 
-	HAL_SPI_Transmit(&hspi1, txBuffer, 3, HAL_MAX_DELAY);
+	HAL_SPI_Transmit(&hspi4, txBuffer, 3, HAL_MAX_DELAY);
 
-	HAL_GPIO_WritePin(GPIOA, lcd_cs_Pin, RESET);
+	HAL_GPIO_WritePin(GPIOE, lcd_cs_Pin, RESET);
 }
 
 void st7920_writeData(uint8_t data)
 {
-	HAL_GPIO_WritePin(GPIOA, lcd_cs_Pin, SET);
+	HAL_GPIO_WritePin(GPIOE, lcd_cs_Pin, SET);
 	uint8_t txBuffer[3];
 	txBuffer[0] = 0xFA;
 	txBuffer[1] = (data & 0xF0);
 	txBuffer[2] = ((data << 4) & 0xF0);
 
-	HAL_SPI_Transmit(&hspi1, txBuffer, 3, HAL_MAX_DELAY);
+	HAL_SPI_Transmit(&hspi4, txBuffer, 3, HAL_MAX_DELAY);
 
-	HAL_GPIO_WritePin(GPIOA, lcd_cs_Pin, RESET);
+	HAL_GPIO_WritePin(GPIOE, lcd_cs_Pin, RESET);
+}
+
+void st7920_gfx()
+{
+	st7920_writeCmd(0x30);  // 8 bit mode
+	HAL_Delay(1);
+	st7920_writeCmd(0x34);  // switch to Extended instructions
+	HAL_Delay(1);
+	st7920_writeCmd(0x36);  // enable graphics
+	HAL_Delay(1);
 }
 
 void st7920_init()
 {
-	HAL_GPIO_WritePin(GPIOA, lcd_rst_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOE, lcd_rst_Pin, GPIO_PIN_RESET);
 	HAL_Delay(10);
-	HAL_GPIO_WritePin(GPIOA, lcd_rst_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOE, lcd_rst_Pin, GPIO_PIN_SET);
 	HAL_Delay(50);
 
 	st7920_writeCmd(0x30);
@@ -59,16 +70,6 @@ void st7920_init()
 	st7920_writeCmd(0x02);
 	HAL_Delay(1);
 	st7920_gfx();
-}
-
-void st7920_gfx()
-{
-	st7920_writeCmd(0x30);  // 8 bit mode
-	HAL_Delay(1);
-	st7920_writeCmd(0x34);  // switch to Extended instructions
-	HAL_Delay(1);
-	st7920_writeCmd(0x36);  // enable graphics
-	HAL_Delay(1);
 }
 
 uint8_t framebuffer[64][16];
