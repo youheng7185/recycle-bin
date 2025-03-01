@@ -14,5 +14,6 @@ void st7920_test();
 void st7920_sendBuffer();
 void st7920_drawPixel(uint8_t pos_x, uint8_t pos_y, uint8_t color);
 void st7920_print(uint8_t x, uint8_t y, const char* str);
+void st7920_clear();
 
 #endif /* INC_ST7920_H_ */

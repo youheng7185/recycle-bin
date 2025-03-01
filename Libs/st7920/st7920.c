@@ -6,6 +6,9 @@
  */
 #include "main.h"
 #include "st7920.h"
+
+#include <string.h>
+
 #include "stm32h7xx.h"
 #include "font.h"
 #include "spi.h"
@@ -139,7 +142,12 @@ void st7920_print(uint8_t x, uint8_t y, const char* str)
 		if(x > 122)
 		{
 			y+=8;
-			x=0;
+			x=1;
 		}
 	}
+}
+
+void st7920_clear() {
+	memset(framebuffer, 0x00, sizeof(framebuffer));
+	st7920_writeCmd(0x10);
 }

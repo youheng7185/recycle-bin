@@ -110,6 +110,10 @@ int main(void)
   /* USER CODE BEGIN 2 */
   HAL_Delay(2000);
   st7920_init();
+  st7920_clear();
+  st7920_print(1, 1, "ESP-IDF is the development framework for Espressif SoCs supported on Windows, Linux and macOS. ESP-IDF Release Support Schedule");
+  st7920_sendBuffer();
+
   char msg[30] = "hello world\r\n";
   HAL_UART_Transmit(&hlpuart1, msg, strlen(msg), 100);
 
