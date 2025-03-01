@@ -110,7 +110,6 @@ int main(void)
   /* USER CODE BEGIN 2 */
   HAL_Delay(2000);
   st7920_init();
-  st7920
   char msg[30] = "hello world\r\n";
   HAL_UART_Transmit(&hlpuart1, msg, strlen(msg), 100);
 

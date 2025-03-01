@@ -79,7 +79,6 @@ Middlewares/Third_Party/FatFs/src/option/syscall.c \
 Core/Src/sysmem.c \
 Core/Src/syscalls.c \
 Libs/vl53l0x/vl53l0x.c \
-Libs/vl53l0x/my_hal_i2c.c \
 Libs/st7920/st7920.c \
 Core/Src/spi.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_spi.c \
