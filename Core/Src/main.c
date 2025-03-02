@@ -24,6 +24,7 @@
 #include "memorymap.h"
 #include "sdmmc.h"
 #include "spi.h"
+#include "tim.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -33,6 +34,7 @@
 #include <stdio.h>
 #include "my_print.h"
 #include "st7920.h"
+#include "stm32h7xx_hal.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -42,7 +44,9 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define SERVO_MIN_PULSE 500    // 0.5 ms
+#define SERVO_MAX_PULSE 2500   // 2.5 ms
+#define SERVO_FREQ 50          // 50 Hz (20 ms period)
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -65,7 +69,11 @@ static void MPU_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+void set_servo_angle(uint8_t angle) {
+  uint32_t pulse = 50 + ((250 - 50) * angle) / 180; // Convert angle to timer counts
+  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, pulse);
+  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, pulse);
+}
 /* USER CODE END 0 */
 
 /**
@@ -103,11 +111,14 @@ int main(void)
   MX_I2C1_Init();
   MX_I2C2_Init();
   MX_LPUART1_UART_Init();
-  MX_UART4_Init();
   MX_SDMMC1_SD_Init();
   MX_FATFS_Init();
   MX_SPI4_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
+
   HAL_Delay(2000);
   st7920_init();
   st7920_clear();
@@ -126,6 +137,13 @@ int main(void)
 
   }
 
+  set_servo_angle(90); // Move to 90 degrees
+  HAL_Delay(1000);
+  set_servo_angle(0); // Move to 0 degrees
+  HAL_Delay(1000);
+  set_servo_angle(180); // Move to 180 degrees
+  HAL_Delay(1000);
+
   uint16_t range = 0;
   //my_printf("hello");
   /* USER CODE END 2 */
@@ -140,6 +158,17 @@ int main(void)
       }
       sprintf(msg, "dev: %d, range: %d\r\n", idx, range);
       HAL_UART_Transmit(&hlpuart1, msg, strlen(msg), 100);
+    }
+
+    for (uint8_t angle = 0; angle <= 180; angle += 5) {
+      set_servo_angle(angle);
+      HAL_Delay(20);  // Small delay for smooth motion
+    }
+
+    // Sweep from 180 to 0 degrees
+    for (uint8_t angle = 180; angle > 0; angle -= 5) {
+      set_servo_angle(angle);
+      HAL_Delay(20);
     }
 
     HAL_Delay(1000);
