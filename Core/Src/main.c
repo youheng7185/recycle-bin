@@ -143,13 +143,18 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    st7920_clear();
+
     for (vl53l0x_idx_t idx = VL53L0X_IDX_FIRST; idx <= VL53L0X_IDX_THIRD; idx++) {
       if (!vl53l0x_read_range_single(idx, &range)) {
         my_printf("read failed device: %d", idx);
       }
       sprintf(msg, "dev: %d, range: %d\r\n", idx, range);
+      st7920_print(1, idx * 8, msg);
       HAL_UART_Transmit(&hlpuart1, msg, strlen(msg), 100);
     }
+
+    st7920_sendBuffer();
     set_servo_speed(150);
     HAL_Delay(1000);
 
