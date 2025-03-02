@@ -35,6 +35,7 @@
 #include "my_print.h"
 #include "st7920.h"
 #include "stm32h7xx_hal.h"
+#include "servo.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -69,11 +70,7 @@ static void MPU_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void set_servo_angle(uint8_t angle) {
-  uint32_t pulse = 50 + ((250 - 50) * angle) / 180; // Convert angle to timer counts
-  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, pulse);
-  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, pulse);
-}
+
 /* USER CODE END 0 */
 
 /**
@@ -137,15 +134,9 @@ int main(void)
 
   }
 
-  set_servo_angle(90); // Move to 90 degrees
-  HAL_Delay(1000);
-  set_servo_angle(0); // Move to 0 degrees
-  HAL_Delay(1000);
-  set_servo_angle(180); // Move to 180 degrees
-  HAL_Delay(1000);
-
+  servo360_init();
+  set_servo_speed(150);
   uint16_t range = 0;
-  //my_printf("hello");
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -159,18 +150,7 @@ int main(void)
       sprintf(msg, "dev: %d, range: %d\r\n", idx, range);
       HAL_UART_Transmit(&hlpuart1, msg, strlen(msg), 100);
     }
-
-    for (uint8_t angle = 0; angle <= 180; angle += 5) {
-      set_servo_angle(angle);
-      HAL_Delay(20);  // Small delay for smooth motion
-    }
-
-    // Sweep from 180 to 0 degrees
-    for (uint8_t angle = 180; angle > 0; angle -= 5) {
-      set_servo_angle(angle);
-      HAL_Delay(20);
-    }
-
+    set_servo_speed(150);
     HAL_Delay(1000);
 
     /* USER CODE END WHILE */
