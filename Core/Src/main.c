@@ -18,8 +18,10 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "dma.h"
 #include "fatfs.h"
 #include "i2c.h"
+#include "i2s.h"
 #include "usart.h"
 #include "memorymap.h"
 #include "sdmmc.h"
@@ -36,6 +38,7 @@
 #include "st7920.h"
 #include "stm32h7xx_hal.h"
 #include "servo.h"
+#include "mic.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -105,6 +108,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_I2C1_Init();
   MX_I2C2_Init();
   MX_LPUART1_UART_Init();
@@ -112,11 +116,13 @@ int main(void)
   MX_FATFS_Init();
   MX_SPI4_Init();
   MX_TIM2_Init();
+  MX_I2S1_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
 
   HAL_Delay(2000);
+  sd_init();
   st7920_init();
   st7920_clear();
   st7920_print(1, 1, "ESP-IDF is the development framework for Espressif SoCs supported on Windows, Linux and macOS. ESP-IDF Release Support Schedule");
