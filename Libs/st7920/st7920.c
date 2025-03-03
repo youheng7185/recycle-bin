@@ -149,5 +149,5 @@ void st7920_print(uint8_t x, uint8_t y, const char* str)
 
 void st7920_clear() {
 	memset(framebuffer, 0x00, sizeof(framebuffer));
-	st7920_writeCmd(0x01);
+	//st7920_writeCmd(0x01);
 }
