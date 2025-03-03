@@ -42,6 +42,7 @@ int16_t i2s_rx_buffer[I2S_BUFFER_SIZE];
 uint32_t total_samples = 0;
 FIL audioFile;
 uint8_t recording = 0;
+char latest_audio_filename[32];
 
 extern I2S_HandleTypeDef hi2s1;
 
@@ -62,7 +63,7 @@ void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef *hi2s) {
 }
 
 void start_recording() {
-  if (f_open(&audioFile, "recording.wav", FA_READ | FA_CREATE_ALWAYS) == FR_OK) {
+  if (f_open(&audioFile, latest_audio_filename, FA_READ | FA_CREATE_ALWAYS) == FR_OK) {
     write_wav_header(&audioFile);
     recording = 1;
     total_samples = 0;
@@ -117,3 +118,68 @@ void append_pcm_data(FIL *file, int16_t *data, uint32_t size) {
   UINT bytesWritten;
   f_write(file, data, size * 2, &bytesWritten);
 }
+
+#define AUDIO_FOLDER "AUDIO"
+#define FILE_TEMPLATE "AUDIO%03d.WAV"
+
+int get_next_audio_filename() {
+  DIR dir;
+  FILINFO fno;
+  int max_number = 0;
+
+  if (f_opendir(&dir, AUDIO_FOLDER) == FR_OK) {
+    while (f_readdir(&dir, &fno) == FR_OK && fno.fname[0]) {
+      if (strstr(fno.fname, "AUDIO") && strstr(fno.fname, ".WAV")) {
+        int num = atoi(fno.fname + 6);
+        if (num > max_number) {
+          max_number = num;
+        }
+      }
+    }
+    f_closedir(&dir);
+  } else {
+    return -1;
+  }
+
+  snprintf(latest_audio_filename, sizeof(latest_audio_filename), AUDIO_FOLDER "/" FILE_TEMPLATE, max_number + 1);
+
+  return max_number + 1;
+}
+
+void list_directory(const char *path, uint8_t depth) {
+    DIR dir;
+    FILINFO fno;
+
+    // Try opening the directory
+    if (f_opendir(&dir, path) == FR_OK) {
+        while (1) {
+            // Read directory content
+            if (f_readdir(&dir, &fno) != FR_OK || fno.fname[0] == 0) break;  // End of directory
+
+            // Ignore "." and ".."
+            if (fno.fname[0] == '.') continue;
+
+            // Indentation for subdirectories
+            for (uint8_t i = 0; i < depth; i++) {
+                my_printf("  ");
+            }
+
+            if (fno.fattrib & AM_DIR) {
+                // It's a directory
+                my_printf("[DIR] %s\r\n", fno.fname);
+
+                // Recursively list subdirectory
+                char new_path[128];
+                snprintf(new_path, sizeof(new_path), "%s/%s", path, fno.fname);
+                list_directory(new_path, depth + 1);
+            } else {
+                // It's a file
+                my_printf("[FILE] %s (%lu bytes)\r\n", fno.fname, fno.fsize);
+            }
+        }
+        f_closedir(&dir);
+    } else {
+        my_printf("Failed to open directory: %s\r\n", path);
+    }
+}
+

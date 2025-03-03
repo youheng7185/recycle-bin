@@ -51,6 +51,7 @@
 #define GPIO_XSHUT_FIRST xshut1_Pin
 #define GPIO_XSHUT_SECOND xshut2_Pin
 #define GPIO_XSHUT_THIRD xshut3_Pin
+#define GPIO_XSHUT_FOURTH xshut4_Pin
 
 typedef struct vl53l0x_info
 {
@@ -69,6 +70,7 @@ static const vl53l0x_info_t vl53l0x_infos[] =
     [VL53L0X_IDX_FIRST] = { .addr = 0x30, .xshut_gpio = GPIO_XSHUT_FIRST },
     [VL53L0X_IDX_SECOND] = { .addr = 0x31, .xshut_gpio = GPIO_XSHUT_SECOND },
     [VL53L0X_IDX_THIRD] = { .addr = 0x32, .xshut_gpio = GPIO_XSHUT_THIRD },
+    [VL53L0X_IDX_FOURTH] = { .addr = 0x33, .xshut_gpio = GPIO_XSHUT_FOURTH },
 };
 
 static uint8_t stop_variable = 0;
@@ -642,6 +644,7 @@ static void configure_gpio()
     HAL_GPIO_WritePin(GPIOG, xshut1_Pin, GPIO_PIN_RESET);
     HAL_GPIO_WritePin(GPIOG, xshut2_Pin, GPIO_PIN_RESET);
     HAL_GPIO_WritePin(GPIOG, xshut3_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(GPIOG, xshut4_Pin, GPIO_PIN_RESET);
 }
 
 /* Sets the address of a single VL53L0X sensor.
@@ -687,7 +690,9 @@ static bool init_addresses()
     if (!init_address(VL53L0X_IDX_THIRD)) {
         return false;
     }
-
+    if (!init_address(VL53L0X_IDX_FOURTH)) {
+        return false;
+    }
     return true;
 }
 
@@ -720,6 +725,9 @@ bool vl53l0x_init()
         return false;
     }
     if (!init_config(VL53L0X_IDX_THIRD)) {
+        return false;
+    }
+    if (!init_config(VL53L0X_IDX_FOURTH)) {
         return false;
     }
     return true;

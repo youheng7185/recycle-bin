@@ -143,6 +143,8 @@ int main(void)
   servo360_init();
   set_servo_speed(150);
   uint16_t range = 0;
+  my_printf("current audio number: %d\r\n", get_next_audio_filename());
+  list_directory("", 0);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -151,7 +153,7 @@ int main(void)
   {
     st7920_clear();
 
-    for (vl53l0x_idx_t idx = VL53L0X_IDX_FIRST; idx <= VL53L0X_IDX_THIRD; idx++) {
+    for (vl53l0x_idx_t idx = VL53L0X_IDX_FIRST; idx <= VL53L0X_IDX_FOURTH; idx++) {
       if (!vl53l0x_read_range_single(idx, &range)) {
         my_printf("read failed device: %d", idx);
       }
