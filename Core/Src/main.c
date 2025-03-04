@@ -39,6 +39,7 @@
 #include "stm32h7xx_hal.h"
 #include "servo.h"
 #include "mic.h"
+#include "esp32.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -117,6 +118,7 @@ int main(void)
   MX_SPI4_Init();
   MX_TIM2_Init();
   MX_I2S1_Init();
+  MX_UART5_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
@@ -164,6 +166,10 @@ int main(void)
 
     st7920_sendBuffer();
     set_servo_speed(150);
+    send_at_command("AT+GET=USERNAME");
+    receive_response();
+    send_at_command("AT+GET=USER_ID");
+    receive_response();
     HAL_Delay(1000);
 
     /* USER CODE END WHILE */
