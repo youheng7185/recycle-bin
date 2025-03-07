@@ -49,6 +49,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+/* USER CODE BEGIN PD */
 #define SERVO_MIN_PULSE 500    // 0.5 ms
 #define SERVO_MAX_PULSE 2500   // 2.5 ms
 #define SERVO_FREQ 50          // 50 Hz (20 ms period)
@@ -74,7 +75,21 @@ static void MPU_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+uint16_t i2s_data[1000];
+volatile int16_t sample_i2s;
 
+void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef *hi2s) {
+  sample_i2s = i2s_data[0];
+}
+
+void start_mic_test() {
+  HAL_I2S_Receive_DMA(&hi2s1, i2s_data, sizeof(i2s_data));
+  //HAL_I2S_Receive_DMA(&hi2s1, (uint16_t *)i2s_data, sizeof(i2s_data));
+}
+
+void print_i2s_data() {
+  my_printf("i2s_data: %d, %d, %d\r\n", i2s_data[499], i2s_data[500], i2s_data[501]);
+}
 /* USER CODE END 0 */
 
 /**
@@ -120,6 +135,7 @@ int main(void)
   MX_I2S1_Init();
   MX_UART5_Init();
   /* USER CODE BEGIN 2 */
+  /*
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
 
@@ -147,14 +163,17 @@ int main(void)
   uint16_t range = 0;
   my_printf("current audio number: %d\r\n", get_next_audio_filename());
   list_directory("", 0);
+  get_next_audio_filename();
+*/
+  start_mic_test();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    st7920_clear();
-
+    //st7920_clear();
+    /*
     for (vl53l0x_idx_t idx = VL53L0X_IDX_FIRST; idx <= VL53L0X_IDX_FOURTH; idx++) {
       if (!vl53l0x_read_range_single(idx, &range)) {
         my_printf("read failed device: %d", idx);
@@ -170,6 +189,8 @@ int main(void)
     receive_response();
     send_at_command("AT+GET=USER_ID");
     receive_response();
+    */
+    print_i2s_data();
     HAL_Delay(1000);
 
     /* USER CODE END WHILE */
